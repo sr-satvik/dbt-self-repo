@@ -1,0 +1,13 @@
+version: 2
+sources:
+ - name: snowflake_source
+   database: MY_DATABASE
+   schema: MY_SCHEMA
+   tables:
+     - name: CUSTOMER_DATA
+     - name: ORDER_DATA
+     - name: PRODUCT_DATA
+     - name: SALES_DATA
+     - name: DATE_DATA
+     - name: TERRITORY_DATA
+     - name: RESELLER_DATA
