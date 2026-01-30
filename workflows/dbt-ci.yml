@@ -1,0 +1,46 @@
+name: dbt CI Pipeline
+on:
+ push:
+   branches: [ main ]
+ pull_request:
+jobs:
+ dbt-test-job:
+   runs-on: ubuntu-latest
+   steps:
+     # 1️⃣ Get your dbt project
+     - name: Checkout repository
+       uses: actions/checkout@v4
+     # 2️⃣ Setup Python
+     - name: Setup Python
+       uses: actions/setup-python@v4
+       with:
+         python-version: "3.10"
+     # 3️⃣ Install dbt
+     - name: Install dbt
+       run: pip install dbt-snowflake
+     # 4️⃣ Create dbt profiles.yml
+     - name: Create dbt profile
+       run: |
+         mkdir -p ~/.dbt
+         echo "${{ secrets.DBT_PROFILES_YML }}" > ~/.dbt/profiles.yml
+     # 5️⃣ Install packages
+     - name: dbt deps
+       run: dbt deps
+     # 6️⃣ Run dbt tests (CI gate)
+     - name: Run dbt tests
+       run: dbt test
+     # 7️⃣ Email notification if tests fail
+     - name: Send email on failure
+       if: failure()
+       uses: dawidd6/action-send-mail@v3
+       with:
+         server_address: smtp.gmail.com
+         server_port: 465
+         username: ${{ secrets.EMAIL_USERNAME }}
+         password: ${{ secrets.EMAIL_PASSWORD }}
+         subject: "❌ dbt CI Test Failed"
+         body: |
+           dbt tests failed in CI pipeline.
+           Please check GitHub Actions logs.
+         to: ${{ secrets.EMAIL_USERNAME }}
+         from: "dbt CI Pipeline"
